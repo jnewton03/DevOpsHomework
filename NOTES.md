@@ -13,7 +13,7 @@
 
 ## Docker Setup
 
-    ``` bash
+    ```console
     sudo apt-get update
     sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -23,7 +23,7 @@
     sudo usermod -aG docker osboxes
         restart ssh session or logout and back in to take effect
     ```
-    
+
 Installed Jenkins in Docker
     docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
     docker update --restart=always <container_id>
