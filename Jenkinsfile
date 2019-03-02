@@ -1,4 +1,8 @@
 pipeline {
+    stage('Initialize'){
+        def dockerHome = tool 'DaticalDocker'
+        env.PATH = "${dockerHome}/bin:${env.PATH}"
+    }
     agent {
         docker {
             image 'maven:3-alpine'
