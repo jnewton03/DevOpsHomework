@@ -51,3 +51,12 @@ Got permission denied error:
     docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) --group-add 998 jenkins/jenkins:lts
 # Recommend creating a new Dockerfile based off the jenkins Docker image.  Also may have been more straightforward to install Jenkins via apt instead of in Docker.
 
+Failure on Deliver Stage due to permissions
+   [Pipeline] stage
+   [Pipeline] { (Deliver)
+   [Pipeline] sh
+    + ./jenkins/scripts/deliver.sh
+    /var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-2b0363fc/script.sh: line 1: ./jenkins/scripts/deliver.sh: Permission denied 
+Fixed with 'git update-index --chmod=+x deliver.sh'
+
+Builds now succeeding
