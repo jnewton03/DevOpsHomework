@@ -1,11 +1,15 @@
-Already had Virtualbox installed
-Downloaded Lubuntu 16.04 VMI per instructions
-Created new VM called 'Datical' with 4GB RAM and 10GB HDD.  Imported existing VDI for Lubuntu.
-Increased video RAM and enabled 3d acceleration.
-Installed VBOXADDITIONS from terminal and rebooted
-    required sudo apt-get install gcc make perl
-Enabled sshd on lubuntu system
-    sudo apt-get install openssh-server
+# Datical DevOps Homework Notes
+
+## VirtualBox Setup
+
++Virtualbox installed
++Downloaded Lubuntu 16.04 VMI per instructions
++Created new VM called 'Datical' with 4GB RAM and 10GB HDD.  Imported existing VDI for Lubuntu.
+  +Increased video RAM and enabled 3d acceleration.
+  +Installed VBOXADDITIONS from terminal and rebooted
+    +`sudo apt-get install gcc make perl`
+  +Enabled sshd on lubuntu system
+    +`sudo apt-get install openssh-server`
 
 Installed docker
     sudo apt-get update
