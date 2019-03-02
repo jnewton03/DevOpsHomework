@@ -13,7 +13,7 @@
 
 ## Docker Setup
 
-``` console
+``` bash
 sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -21,49 +21,77 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 sudo usermod -aG docker osboxes
-restart ssh session or logout and back in to take effect
 ```
 
-Installed Jenkins in Docker
-    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
-    docker update --restart=always <container_id>
-Access Jenkins UI using VirtualBox bridged Network
-    http://192.168.1.35:8080
-Gather Unlock password
-    docker exec <container_id> cat /var/jenkins_home/secrets/initialAdminPassword
-Install suggested plugins
-Create Admin User
-    admin/admin
-Created new job called 'Datical Homework' as multibranch pipeline
-    Added SCM w/ GitHub account
-Build Failure Log indicates Docker Client is not installed
-    /var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-fc32624e/script.sh: 1: /var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-fc32624e/script.sh: docker: not found
-Go to Manage Jenkins -> Global Tool Configuration
-Add Docker
-    Name: DaticalDocker
-    Install Automatically: Yes
-    Docker Version: Latest
+NOTE: restarting ssh session or logout/login required to take effect.
 
-Updated the Jenkins Docker instance to map the docker client socket and executable to be available within the container:
-    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) jenkins/jenkins:lts
+## Install Jenkins in Docker
 
-Got permission denied error:
-    + docker inspect -f . maven:3-alpine
+``` bash
+docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+docker update --restart=always <container_id>
+```
 
-    Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.39/containers/maven:3-alpine/json: dial unix /var/run/docker.sock: connect: permission denied
++ Access Jenkins UI using VirtualBox bridged network
+  + http://192.168.1.35:8080
+  + Your IP will likely be different depending on your network
++ Gather Unlock password
+  + `docker exec <container_id> cat /var/jenkins_home/secrets/initialAdminPassword`
++ Install suggested plugins
++ Create Admin User
+  + admin/admin
++ Created new job called 'Datical Homework' as multibranch pipeline
+  + Added SCM w/ GitHub account
 
-    This issue is caused by the jenkins user not being in the Docker group inside the container
+## Troubleshooting
 
- Updated the Jenkins Docker instance to add to the Docker group (gid 998)
-    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) --group-add 998 jenkins/jenkins:lts
-# Recommend creating a new Dockerfile based off the jenkins Docker image.  Also may have been more straightforward to install Jenkins via apt instead of in Docker.
+### Docker Client not installed
 
-Failure on Deliver Stage due to permissions
-   [Pipeline] stage
-   [Pipeline] { (Deliver)
-   [Pipeline] sh
-    + ./jenkins/scripts/deliver.sh
-    /var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-2b0363fc/script.sh: line 1: ./jenkins/scripts/deliver.sh: Permission denied 
-Fixed with 'git update-index --chmod=+x deliver.sh'
+``` bash
+/var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-fc32624e/script.sh: 1: /var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-fc32624e/script.sh: docker: not found
+```
 
-Builds now succeeding
+#### Add Docker to Jenkins Config
+
++ Go to Manage Jenkins -> Global Tool Configuration
++ Add Docker
+  + Name: DaticalDocker
+  + Install Automatically: Yes
+  + Docker Version: Latest
+
++ Updated the Jenkins Docker instance to map the docker client socket and executable to be available within the container:
+
+  ``` bash
+  docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) jenkins/jenkins:lts
+  ```
+
++ Got permission denied error:
+
+``` bash
+docker inspect -f . maven:3-alpine
+Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.39/containers/maven:3-alpine/json: dial unix /var/run/docker.sock: connect: permission denied
+```
+
+This issue is caused by the jenkins user not being in the Docker group inside the container
+
++ Updated the Jenkins Docker instance to add to the Docker group (gid 998)
+
+```bash
+docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) --group-add 998 jenkins/jenkins:lts
+```
+
+__Recommend creating a new Dockerfile based off the jenkins Docker image.  Also may have been more straightforward to install Jenkins via apt instead of in Docker.__
+
+### Failure on Deliver Stage due to permissions
+
+```bash
+[Pipeline] stage
+[Pipeline] { (Deliver)
+[Pipeline] sh
++ ./jenkins/scripts/deliver.sh
+/var/jenkins_home/workspace/Datical_Homework_master@tmp/durable-2b0363fc/script.sh: line 1: ./jenkins/scripts/deliver.sh: Permission denied 
+```
+
+Fixed with `git update-index --chmod=+x deliver.sh`
+
+__Builds now succeeding__
