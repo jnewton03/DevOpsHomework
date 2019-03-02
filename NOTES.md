@@ -23,8 +23,7 @@ Installed Jenkins in Docker
 Access Jenkins UI using VirtualBox bridged Network
     http://192.168.1.35:8080
 Gather Unlock password
-    docker exec -it <container_id> bash
-    cat /var/jenkins_home/secrets/initialAdminPassword
+    docker exec <container_id> cat /var/jenkins_home/secrets/initialAdminPassword
 Install suggested plugins
 Create Admin User
     admin/admin
@@ -38,4 +37,17 @@ Add Docker
     Install Automatically: Yes
     Docker Version: Latest
 
-   
+Updated the Jenkins Docker instance to map the docker client socket and executable to be available within the container:
+    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) jenkins/jenkins:lts
+
+Got permission denied error:
+    + docker inspect -f . maven:3-alpine
+
+    Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.39/containers/maven:3-alpine/json: dial unix /var/run/docker.sock: connect: permission denied
+
+    This issue is caused by the jenkins user not being in the Docker group inside the container
+
+ Updated the Jenkins Docker instance to add to the Docker group (gid 998)
+    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) --group-add 998 jenkins/jenkins:lts
+# Recommend creating a new Dockerfile based off the jenkins Docker image.  Also may have been more straightforward to install Jenkins via apt instead of in Docker.
+
